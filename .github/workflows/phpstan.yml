@@ -1,9 +1,8 @@
 name: PHPStan
 on:
-  push:
-    branches:
-      - main
-      - develop
+  # push:
+  #   branches:
+  #     - develop
   pull_request:
     types:
       - opened

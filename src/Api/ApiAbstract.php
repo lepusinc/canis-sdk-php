@@ -45,24 +45,9 @@ abstract class ApiAbstract
     public array $placeholders = [];
 
     /**
-     * @var string|null $token
-     */
-    public ?string $token;
-
-    /**
      * @var LoggerInterface|null $logger
      */
     public ?LoggerInterface $logger;
-
-    /**
-     * @param string|null $token
-     * @return $this
-     */
-    public function setToken(?string $token): self
-    {
-        $this->token = $token;
-        return $this;
-    }
 
     /**
      * @param LoggerInterface $logger
@@ -372,13 +357,9 @@ abstract class ApiAbstract
      */
     public function useTokenAdapter(): self
     {
-        if (empty($this->token)) {
-            throw TokenNotFoundException::factory(
-                'Token is not found. Use set_token to configure access token before using token adapter.'
-            );
-        }
-
-        $this->authAdapter = new TokenAdapter($this->token);
+        $this->authAdapter = new TokenAdapter(
+            $this->config['token']
+        );
         return $this;
     }
 
