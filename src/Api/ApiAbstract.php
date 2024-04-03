@@ -74,7 +74,7 @@ abstract class ApiAbstract
      * @param array<string,string> $config
      * @return void
      */
-    protected function init(array $config): void
+    public function init(array $config): void
     {
         $this->config = $this->resolveConfig($config);
 
@@ -88,7 +88,7 @@ abstract class ApiAbstract
      * @param array<string,string> $config
      * @return array<string,string>
      */
-    protected function resolveConfig(array $config): array
+    public function resolveConfig(array $config): array
     {
         $config = array_merge(
             [
@@ -108,9 +108,9 @@ abstract class ApiAbstract
      *
      * @return \GuzzleHttp\Client
      */
-    protected function getHttpClient(): \GuzzleHttp\Client
+    public function getHttpClient(): \GuzzleHttp\Client
     {
-        if ($this->httpClient instanceof \GuzzleHttp\Client) {
+        if (!$this->httpClient instanceof \GuzzleHttp\Client) {
             $this->httpClient = new \GuzzleHttp\Client();
         }
 
