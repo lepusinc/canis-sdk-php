@@ -304,10 +304,6 @@ abstract class ApiAbstract
      */
     protected function logHttp(string $level, string $method, string $endpoint, array $options, ?ResponseInterface $response = null): void
     {
-        if (empty($this->logger)) {
-            return;
-        }
-
         $status_code = !empty($response) ? $response->getStatusCode() : '200';
         $message = !empty($response) ? $response->getReasonPhrase() : '';
         $optionsJson = json_encode($options);
