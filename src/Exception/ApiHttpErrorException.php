@@ -6,7 +6,7 @@ namespace Canis\Exception;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
 
-class ApiHttpErrorException extends CanisException
+final class ApiHttpErrorException extends \RuntimeException
 {
     /**
      * Factory method
