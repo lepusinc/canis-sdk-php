@@ -9,8 +9,8 @@ on:
       - synchronize
       - reopened
 jobs:
-  phpunit:
-    name: PHPStan (PHP ${{ matrix.php-versions }} on ${{ matrix.operating-system }})
+  php_ci:
+    name: PHPStan & PHPUnit (PHP ${{ matrix.php-versions }} on ${{ matrix.operating-system }})
     runs-on: ${{ matrix.operating-system }}
     strategy:
       fail-fast: false
