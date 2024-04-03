@@ -1,7 +1,6 @@
 *.phar
 *.zip
 build/artifacts
-phpunit.xml
 phpunit.functional.xml
 test_services.json
 .idea
