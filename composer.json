@@ -24,7 +24,7 @@
     "require-dev": {
         "composer/composer" : "^1.10.22",
         "phpunit/phpunit": "^10.0",
-        "mockery/mockery": "^1.4",
+        "mockery/mockery": "^1.6",
         "phpstan/phpstan": "^1.10"
     },
     "autoload": {
