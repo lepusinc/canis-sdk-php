@@ -42,7 +42,7 @@ class KeySecretAdapterTest extends TestCase
         $this->assertEquals($secret, $options[$queryKeyName]['client_secret']);
     }
 
-    public static function data_setCredential()
+    public static function data_setCredential(): array
     {
         return [
             [false],
