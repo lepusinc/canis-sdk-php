@@ -1,0 +1,13 @@
+parameters:
+
+  level: 7
+
+  parallel:
+    processTimeout: 1200.0
+
+  paths:
+    - src
+    - tests
+
+  scanDirectories:
+    - Vendor

@@ -1,0 +1,40 @@
+{
+    "name": "lepusinc/canis-sdk-php",
+    "homepage": "https://github.com/lepusinc/canis-sdk-php",
+    "description": "CANIS SDK for PHP - Use CANIS Services in your PHP project",
+    "keywords": ["canis","lepus"],
+    "type": "library",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Lepus Inc.",
+            "homepage": "https://lep.jp"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/lepusinc/canis-sdk-php/issues"
+    },
+    "require": {
+        "php": ">=8.2.0",
+        "guzzlehttp/guzzle": "^7.8",
+        "symfony/http-foundation": "^7.0",
+        "nesbot/carbon": "^3.2",
+        "monolog/monolog": "^2.9"
+    },
+    "require-dev": {
+        "composer/composer" : "^1.10.22",
+        "phpunit/phpunit": "^10.0",
+        "mockery/mockery": "^1.4",
+        "phpstan/phpstan": "^1.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "Canis\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Aws\\Test\\": "tests/"
+        }
+    }
+}
