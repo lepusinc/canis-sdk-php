@@ -3,15 +3,17 @@ declare(strict_types=1);
 
 namespace Canis\Api;
 
+use Canis\Api\Auth\Config;
+
 Class Group extends ApiAbstract
 {
     const API_URI_GROUP = '/group';
 
     /**
-     * @param array<string,string> $config
+     * @param \Canis\Api\Auth\Config $config
      * @return $this
      */
-    public function __construct(array $config)
+    public function __construct(Config $config)
     {
         parent::__construct($config);
 
@@ -26,7 +28,7 @@ Class Group extends ApiAbstract
     public function getGroups(): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->get(self::API_URI_GROUP)
         ;
     }
