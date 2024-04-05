@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Canis\Api;
 
+use Canis\Api\Auth\Config;
+
 Class CP_API_Seminar extends ApiAbstract
 {
     const API_URI_SEMINAR = '/seminar';
@@ -12,10 +14,10 @@ Class CP_API_Seminar extends ApiAbstract
     const API_URI_SEMINAR_ENQUETE = '/seminar/enquete/:wp_post_id';
 
     /**
-     * @param array<string,string> $config
+     * @param \Canis\Api\Auth\Config $config
      * @return $this
      */
-    public function __construct(array $config)
+    public function __construct(Config $config)
     {
         parent::__construct($config);
 
@@ -31,7 +33,7 @@ Class CP_API_Seminar extends ApiAbstract
     public function postSeminar(array $params): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->post(self::API_URI_SEMINAR, $params)
         ;
     }
@@ -46,7 +48,7 @@ Class CP_API_Seminar extends ApiAbstract
     public function putSeminar(string $postId, array $params): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->setPlaceholders([':wp_post_id' => $postId])
             ->put(self::API_URI_SEMINAR_WP_POST, $params)
         ;
@@ -61,7 +63,7 @@ Class CP_API_Seminar extends ApiAbstract
     public function getSeminarEnquete(string $postId): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->setPlaceholders([':wp_post_id' => $postId])
             ->get(self::API_URI_SEMINAR_ENQUETE)
         ;
@@ -76,7 +78,7 @@ Class CP_API_Seminar extends ApiAbstract
     public function getSeminar(string $postId): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->setPlaceholders([':wp_post_id' => $postId])
             ->get(self::API_URI_SEMINAR_WP_POST)
         ;

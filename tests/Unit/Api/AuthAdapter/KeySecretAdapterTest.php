@@ -3,14 +3,14 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Api\AuthAdapter;
 
-use Canis\Api\AuthAdapter\KeySecretAdapter;
+use Canis\Api\Auth\Adapter\KeySecretAdapter;
 use Canis\Exception\KeySecretNotFoundException;
 use PHPUnit\Framework\TestCase;
 
 class KeySecretAdapterTest extends TestCase
 {
     /**
-     * @covers \Canis\Api\AuthAdapter\KeySecretAdapter::validate
+     * @covers \Canis\Api\Auth\Adapter\KeySecretAdapter::validate
      */
     public function test_validate(): void
     {
@@ -21,7 +21,7 @@ class KeySecretAdapterTest extends TestCase
     }
 
     /**
-     * @covers \Canis\Api\AuthAdapter\KeySecretAdapter::setCredential
+     * @covers \Canis\Api\Auth\Adapter\KeySecretAdapter::setCredential
      * @dataProvider data_setCredential
      */
     public function test_setCredential(

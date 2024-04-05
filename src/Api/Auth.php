@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Canis\Api;
 
+use Canis\Api\Auth\Config;
+
 Class Auth extends ApiAbstract
 {
     const API_URI_AUTH_LOGIN = '/auth/login';
@@ -26,10 +28,10 @@ Class Auth extends ApiAbstract
     const WHITELIST_SCOPE_EMAIL_REGISTERED = 'email-registered';
 
     /**
-     * @param array<string,string> $config
+     * @param \Canis\Api\Auth\Config $config
      * @return $this
      */
-    public function __construct(array $config)
+    public function __construct(Config $config)
     {
         parent::__construct($config);
 
@@ -45,7 +47,7 @@ Class Auth extends ApiAbstract
     public function postLogin(array $params): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->post(self::API_URI_AUTH_LOGIN, $params)
         ;
     }
@@ -58,7 +60,7 @@ Class Auth extends ApiAbstract
     public function getLogin(): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->get(self::API_URI_AUTH_LOGIN)
         ;
     }
@@ -72,7 +74,7 @@ Class Auth extends ApiAbstract
     public function postLoginId(array $params): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->post(self::API_URI_AUTH_LOGIN_ID, $params)
         ;
     }
@@ -87,7 +89,7 @@ Class Auth extends ApiAbstract
     public function getEmailWhitelist(string $scope, array $params): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->setPlaceholders([':scope' => $scope])
             ->get(self::API_URI_AUTH_EMAIL_WHITELIST, $params)
         ;
@@ -144,7 +146,7 @@ Class Auth extends ApiAbstract
     public function postCredential(array $params): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->post(self::API_URI_AUTH_CREDENTIAL, $params)
         ;
     }
@@ -158,7 +160,7 @@ Class Auth extends ApiAbstract
     public function putPassword(array $params): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->put(self::API_URI_AUTH_PASSWORD, $params)
         ;
     }
@@ -172,7 +174,7 @@ Class Auth extends ApiAbstract
     public function putPasswordLegacy(array $params): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->put(self::API_URI_AUTH_PASSWORD_LEGACY, $params)
         ;
     }
@@ -186,7 +188,7 @@ Class Auth extends ApiAbstract
     public function postPasswordReset(array $params): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->post(self::API_URI_AUTH_PASSWORD_RESET, $params)
         ;
     }
@@ -200,7 +202,7 @@ Class Auth extends ApiAbstract
     public function getVerifyToken(array $params): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->get(self::API_URI_AUTH_VERIFY_TOKEN, $params)
         ;
     }
@@ -214,7 +216,7 @@ Class Auth extends ApiAbstract
     public function putPasswordReset(array $params): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->put(self::API_URI_AUTH_PASSWORD_RESET, $params)
         ;
     }

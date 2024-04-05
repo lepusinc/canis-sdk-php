@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Canis\Exception;
+namespace Canis\Exception\Trait;
 
 use Throwable;
 
-final class TokenNotFoundException extends \RuntimeException
+trait Factoryable
 {
     /**
      * Factory method

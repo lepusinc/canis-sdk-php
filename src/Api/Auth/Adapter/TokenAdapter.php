@@ -1,18 +1,19 @@
 <?php
 declare(strict_types=1);
 
-namespace Canis\Api\AuthAdapter;
+namespace Canis\Api\Auth\Adapter;
 
-use Canis\Exception\TokenNotFoundException;
+use Canis\Api\Auth\Token;
+use Canis\Exception\TokenInvalidException;
 
 class TokenAdapter implements AuthAdapterInterface
 {
     /**
-     * @param string $token
+     * @param Token $token
      * @return $this
      */
     public function __construct(
-        public string $token
+        public Token $token
     )
     {
     }
@@ -22,9 +23,18 @@ class TokenAdapter implements AuthAdapterInterface
      */
     public function validate(): void
     {
-        if (empty($this->token)) {
-            throw new TokenNotFoundException('Token is not configured.');
+        if ($this->token->isEmpty()) {
+            throw TokenInvalidException::empty(
+                'This adapter requires token but not found.'
+            );
         }
+
+        if ($this->token->isInvalid()) {
+            throw TokenInvalidException::invalid(
+                'This adapter requires valid token but it is invalid.'
+            );
+        }
+
     }
 
     /**
@@ -35,7 +45,7 @@ class TokenAdapter implements AuthAdapterInterface
         $this->validate();
 
         $authorization = [
-            'Authorization' => "Bearer {$this->token}",
+            'Authorization' => "Bearer " . $this->token->getToken(),
         ];
 
         if (empty($options['headers'])) {

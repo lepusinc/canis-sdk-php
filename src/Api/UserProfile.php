@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Canis\Api;
 
+use Canis\Api\Auth\Config;
+
 Class CP_API_User_Profile extends ApiAbstract
 {
     const API_URI_USER_PROFILE = '/user/profile/:uuid';
@@ -10,10 +12,10 @@ Class CP_API_User_Profile extends ApiAbstract
     const API_URI_USER_DELIVERY_EMAIL = '/user/delivery-email/:uuid';
 
     /**
-     * @param array<string,string> $config
+     * @param \Canis\Api\Auth\Config $config
      * @return $this
      */
-    public function __construct(array $config)
+    public function __construct(Config $config)
     {
         parent::__construct($config);
 
@@ -29,7 +31,7 @@ Class CP_API_User_Profile extends ApiAbstract
     public function getUserProfile(string $uuid): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->setPlaceholders([':uuid' => $uuid])
             ->get(self::API_URI_USER_PROFILE)
         ;
@@ -45,7 +47,7 @@ Class CP_API_User_Profile extends ApiAbstract
     public function postUserProfile(string $uuid, array $params): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->setPlaceholders([':uuid' => $uuid])
             ->post(self::API_URI_USER_PROFILE, $params)
         ;
@@ -61,7 +63,7 @@ Class CP_API_User_Profile extends ApiAbstract
     public function putUserProfile(string $uuid, array $params): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->setPlaceholders([':uuid' => $uuid])
             ->put(self::API_URI_USER_PROFILE, $params)
         ;
@@ -77,7 +79,7 @@ Class CP_API_User_Profile extends ApiAbstract
     public function putUserDeliveryEmail(string $uuid, array $params): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->setPlaceholders([':uuid' => $uuid])
             ->put(self::API_URI_USER_DELIVERY_EMAIL, $params)
         ;
@@ -93,7 +95,7 @@ Class CP_API_User_Profile extends ApiAbstract
     public function putUserEmail(string $uuid, array $params): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->setPlaceholders([':uuid' => $uuid])
             ->put(self::API_URI_USER_EMAIL, $params)
         ;
