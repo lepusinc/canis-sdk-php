@@ -6,96 +6,10 @@ namespace Tests\Unit\Api;
 use Canis\Api\ApiAbstract;
 use Canis\Api\Auth\Config;
 use Canis\Api\Auth\Token;
-use GuzzleHttp\ClientInterface;
 use PHPUnit\Framework\TestCase;
-use Mockery;
-use Mockery\MockInterface;
-use Psr\Http\Message\ResponseInterface;
 
 class ApiAbstractTest extends TestCase
 {
-    /**
-     * @var \Mockery\MockInterface
-     */
-    protected MockInterface $client;
-
-    /**
-     * @var \Mockery\MockInterface
-     */
-    protected MockInterface $psrResponse;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->client = Mockery::mock(ClientInterface::class);
-        $this->psrResponse = Mockery::mock(ResponseInterface::class);
-    }
-
-    /**
-     * Return an instance of the class.
-     * 
-     * @param string $endpoint
-     * @param Token|null $token
-     * @param string $key
-     * @param string $secret
-     * @param array $options
-     * @return \Canis\Api\ApiAbstract
-     */
-    private function getClass(
-        string $endpoint = '',
-        ?Token $token = null,
-        string $key = '',
-        string $secret = '',
-        array $options = []
-    ): ApiAbstract
-    {
-        $config = $this->getConfig(
-            endpoint: $endpoint,
-            token: $token ?? Token::factory(),
-            key: $key,
-            secret: $secret,
-            options: $options,
-        );
-
-        return new class($config) extends \Canis\Api\ApiAbstract {
-            /**
-             * @param Config $config
-             */
-            public function __construct(Config $config)
-            {
-                parent::__construct($config);
-            }
-        };
-    }
-
-    /**
-     * Return an instance of the Config class.
-     * 
-     * @param string $endpoint
-     * @param Token|null $token
-     * @param string $key
-     * @param string $secret
-     * @param array $options
-     * @return \Canis\Api\Auth\Config
-     */
-    private function getConfig(
-        string $endpoint = '',
-        ?Token $token = null,
-        string $key = '',
-        string $secret = '',
-        array $options = []
-    ): Config
-    {
-        return new \Canis\Api\Auth\Config(
-            endpoint: $endpoint,
-            token: $token ?? Token::factory(),
-            key: $key,
-            secret: $secret,
-            options: $options,
-        );
-    }
-
     /**
      * @covers \Canis\Api\ApiAbstract::__construct
      */
@@ -165,23 +79,134 @@ class ApiAbstractTest extends TestCase
      */
     public function test_sendRequest(): void
     {
-        $this->markTestIncomplete();
+        $api = $this->getClass(
+            endpoint: 'https://api.canis.io',
+        );
 
-        // $api = $this->getClass([
-        //     'endpoint_url' => 'https://api.canis.io',
-        // ]);
+        $results = $api->sendRequest(
+            'GET',
+            'user/profile/:uuid',
+            ['handler' => $this->getMockHandler(
+                body: json_encode(['text' => 'foo']),
+            )],
+        );
 
-        // $this->client
-        //     ->shouldReceive('request')
-        //     ->once()
-        //     ->with('GET', 'https://api.canis.io/v1user/profile/:uuid', [])
-        //     ->andReturn($this->psrResponse);
+        $this->assertEquals(['text' => 'foo'], $results);
+    }
 
-        // $this->psrResponse
-        //     ->shouldReceive('getBody')
-        //     ->once()
-        //     ->andReturn('[{"text":"foo"},{"text":"bar"}]');
+    /**
+     * @covers \Canis\Api\ApiAbstract::withKeySecretAdapter
+     */
+    public function test_withKeySecretAdapter(): void
+    {
+        $api = $this->getClass(
+            key: 'key',
+            secret: 'secret',
+        );
+        $api->withKeySecretAdapter();
 
-        // $results = $api->sendRequest('GET', 'user/profile/:uuid', []);
+        /** @var \Canis\Api\Auth\Adapter\KeySecretAdapter $adapter */
+        $adapter = $api->getAdapter();
+        $this->assertInstanceOf(\Canis\Api\Auth\Adapter\KeySecretAdapter::class, $adapter);
+        $this->assertEquals('key', $adapter->key);
+        $this->assertEquals('secret', $adapter->secret);
+    }
+
+    /**
+     * @covers \Canis\Api\ApiAbstract::withTokenAdapter
+     */
+    public function test_withTokenAdapter(): void
+    {
+        $api = $this->getClass(
+            token: Token::factory(token: 'abcdefghijklmnopqrstuvwxyz'),
+        );
+        $api->withTokenAdapter();
+
+        /** @var \Canis\Api\Auth\Adapter\TokenAdapter $adapter */
+        $adapter = $api->getAdapter();
+        $this->assertInstanceOf(\Canis\Api\Auth\Adapter\TokenAdapter::class, $adapter);
+        $this->assertEquals('abcdefghijklmnopqrstuvwxyz', $adapter->token->getToken());
+    }
+
+    /**
+     * Create mock handler.
+     *
+     * @return \GuzzleHttp\HandlerStack
+     */
+    public function getMockHandler(
+        int $status = 200,
+        array $headers = [],
+        string $body = ''
+    ): \GuzzleHttp\HandlerStack
+    {
+        $mock = new \GuzzleHttp\Handler\MockHandler([
+            new \GuzzleHttp\Psr7\Response($status, $headers, $body),
+        ]);
+
+        return \GuzzleHttp\HandlerStack::create($mock);
+    }
+
+    /**
+     * Return an instance of the class.
+     * 
+     * @param string $endpoint
+     * @param Token|null $token
+     * @param string $key
+     * @param string $secret
+     * @param array $options
+     * @return \Canis\Api\ApiAbstract
+     */
+    private function getClass(
+        string $endpoint = '',
+        ?Token $token = null,
+        string $key = '',
+        string $secret = '',
+        array $options = []
+    ): ApiAbstract
+    {
+        $config = $this->getConfig(
+            endpoint: $endpoint,
+            token: $token ?? Token::factory(),
+            key: $key,
+            secret: $secret,
+            options: $options,
+        );
+
+        return new class($config) extends \Canis\Api\ApiAbstract {
+            /**
+             * @param Config $config
+             */
+            public function __construct(Config $config)
+            {
+                parent::__construct($config);
+            }
+        };
+    }
+
+    /**
+     * Return an instance of the Config class.
+     * 
+     * @param string $endpoint
+     * @param Token|null $token
+     * @param string $key
+     * @param string $secret
+     * @param array $options
+     * @return \Canis\Api\Auth\Config
+     */
+    private function getConfig(
+        string $endpoint = '',
+        ?Token $token = null,
+        string $key = '',
+        string $secret = '',
+        array $options = []
+    ): Config
+    {
+        return new \Canis\Api\Auth\Config(
+            endpoint: $endpoint,
+            token: $token ?? Token::factory(),
+            key: $key,
+            secret: $secret,
+            options: $options,
+        );
     }
 }

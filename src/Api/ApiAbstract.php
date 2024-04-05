@@ -89,6 +89,16 @@ abstract class ApiAbstract
     }
 
     /**
+     * Get a instance of the AuthAdapterInterface.
+     *
+     * @return AuthAdapterInterface
+     */
+    public function getAdapter(): AuthAdapterInterface
+    {
+        return $this->authAdapter;
+    }
+
+    /**
      * @param array<string,string> $placeholders
      * @return self
      */
