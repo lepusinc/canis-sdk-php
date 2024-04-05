@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Api\AuthAdapter;
 
-use Canis\Api\AuthAdapter\KeySecretAdapter;
-use Canis\Api\AuthAdapter\TokenAdapter;
+use Canis\Api\Auth\Adapter\KeySecretAdapter;
+use Canis\Api\Auth\Adapter\TokenAdapter;
 use Canis\Exception\KeySecretNotFoundException;
 use Canis\Exception\TokenNotFoundException;
 use PHPUnit\Framework\TestCase;
@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 class TokenAdapterTest extends TestCase
 {
     /**
-     * @covers \Canis\Api\AuthAdapter\TokenAdapter::validate
+     * @covers \Canis\Api\Auth\Adapter\TokenAdapter::validate
      */
     public function test_validate(): void
     {
@@ -23,7 +23,7 @@ class TokenAdapterTest extends TestCase
     }
 
     /**
-     * @covers \Canis\Api\AuthAdapter\TokenAdapter::setCredential
+     * @covers \Canis\Api\Auth\Adapter\TokenAdapter::setCredential
      */
     public function test_setCredential(): void
     {

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Canis\Api\AuthAdapter;
+namespace Canis\Api\Auth\Adapter;
 
 use Canis\Exception\TokenNotFoundException;
 

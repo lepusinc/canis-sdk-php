@@ -28,7 +28,7 @@ Class SeminarPayment extends ApiAbstract
     public function postSeminarPayment(string $postId, array $params): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->setPlaceholders([':wp_post_id' => $postId])
             ->post(self::API_URI_SEMINAR_PAYMENT, $params)
         ;

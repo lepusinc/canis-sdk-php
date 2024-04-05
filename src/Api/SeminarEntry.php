@@ -32,7 +32,7 @@ Class CP_API_Seminar_Entry extends ApiAbstract
     public function getSeminarEntries(): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->get(self::API_URI_SEMINAR_ENTRY)
         ;
     }
@@ -46,7 +46,7 @@ Class CP_API_Seminar_Entry extends ApiAbstract
     public function getSeminarEntry(string $postId): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->setPlaceholders([':wp_post_id' => $postId])
             ->get(self::API_URI_SEMINAR_ENTRY_WP_POST)
         ;
@@ -62,7 +62,7 @@ Class CP_API_Seminar_Entry extends ApiAbstract
     public function postSeminarEntryNonMember(string $postId, array $params): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->setPlaceholders([':wp_post_id' => $postId])
             ->post(self::API_URI_SEMINAR_ENTRY_NON_MEMBER, $params)
         ;
@@ -78,7 +78,7 @@ Class CP_API_Seminar_Entry extends ApiAbstract
     public function postSeminarEntryMember(string $postId, array $params): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->setPlaceholders([':wp_post_id' => $postId])
             ->post(self::API_URI_SEMINAR_ENTRY_MEMBER, $params)
         ;
@@ -94,7 +94,7 @@ Class CP_API_Seminar_Entry extends ApiAbstract
     public function putSeminarEntry(string $postId, array $params): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->setPlaceholders([':wp_post_id' => $postId])
             ->put(self::API_URI_SEMINAR_ENTRY_WP_POST, $params)
         ;
@@ -109,7 +109,7 @@ Class CP_API_Seminar_Entry extends ApiAbstract
     public function deleteSeminarEntry(string $postId): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->setPlaceholders([':wp_post_id' => $postId])
             ->delete(self::API_URI_SEMINAR_ENTRY_WP_POST)
         ;

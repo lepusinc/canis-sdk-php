@@ -31,7 +31,7 @@ Class CP_API_Seminar extends ApiAbstract
     public function postSeminar(array $params): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->post(self::API_URI_SEMINAR, $params)
         ;
     }
@@ -46,7 +46,7 @@ Class CP_API_Seminar extends ApiAbstract
     public function putSeminar(string $postId, array $params): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->setPlaceholders([':wp_post_id' => $postId])
             ->put(self::API_URI_SEMINAR_WP_POST, $params)
         ;
@@ -61,7 +61,7 @@ Class CP_API_Seminar extends ApiAbstract
     public function getSeminarEnquete(string $postId): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->setPlaceholders([':wp_post_id' => $postId])
             ->get(self::API_URI_SEMINAR_ENQUETE)
         ;
@@ -76,7 +76,7 @@ Class CP_API_Seminar extends ApiAbstract
     public function getSeminar(string $postId): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->setPlaceholders([':wp_post_id' => $postId])
             ->get(self::API_URI_SEMINAR_WP_POST)
         ;

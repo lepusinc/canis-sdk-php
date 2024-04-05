@@ -29,7 +29,7 @@ Class CP_API_User_Profile extends ApiAbstract
     public function getUserProfile(string $uuid): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->setPlaceholders([':uuid' => $uuid])
             ->get(self::API_URI_USER_PROFILE)
         ;
@@ -45,7 +45,7 @@ Class CP_API_User_Profile extends ApiAbstract
     public function postUserProfile(string $uuid, array $params): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->setPlaceholders([':uuid' => $uuid])
             ->post(self::API_URI_USER_PROFILE, $params)
         ;
@@ -61,7 +61,7 @@ Class CP_API_User_Profile extends ApiAbstract
     public function putUserProfile(string $uuid, array $params): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->setPlaceholders([':uuid' => $uuid])
             ->put(self::API_URI_USER_PROFILE, $params)
         ;
@@ -77,7 +77,7 @@ Class CP_API_User_Profile extends ApiAbstract
     public function putUserDeliveryEmail(string $uuid, array $params): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->setPlaceholders([':uuid' => $uuid])
             ->put(self::API_URI_USER_DELIVERY_EMAIL, $params)
         ;
@@ -93,7 +93,7 @@ Class CP_API_User_Profile extends ApiAbstract
     public function putUserEmail(string $uuid, array $params): array
     {
         return $this
-            ->useTokenAdapter()
+            ->withTokenAdapter()
             ->setPlaceholders([':uuid' => $uuid])
             ->put(self::API_URI_USER_EMAIL, $params)
         ;

@@ -3,12 +3,11 @@ declare(strict_types=1);
 
 namespace Canis\Api;
 
-use Canis\Api\AuthAdapter\AuthAdapterInterface;
-use Canis\Api\AuthAdapter\KeySecretAdapter;
-use Canis\Api\AuthAdapter\TokenAdapter;
+use Canis\Api\Auth\Adapter\AuthAdapterInterface;
+use Canis\Api\Auth\Adapter\KeySecretAdapter;
+use Canis\Api\Auth\Adapter\TokenAdapter;
 use Canis\Exception\ApiHttpErrorException;
 use Canis\Exception\ApiUrlNotFoundException;
-use Canis\Exception\TokenNotFoundException;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ServerException;
 use Psr\Http\Message\ResponseInterface;
@@ -337,7 +336,7 @@ abstract class ApiAbstract
      *
      * @return self
      */
-    public function useKeySecretAdapter(): self
+    public function withKeySecretAdapter(): self
     {
         $this->authAdapter = new KeySecretAdapter(
             $this->config['key'],
@@ -351,7 +350,7 @@ abstract class ApiAbstract
      *
      * @return self
      */
-    public function useTokenAdapter(): self
+    public function withTokenAdapter(): self
     {
         $this->authAdapter = new TokenAdapter(
             $this->config['token']

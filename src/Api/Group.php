@@ -26,7 +26,7 @@ Class Group extends ApiAbstract
     public function getGroups(): array
     {
         return $this
-            ->useKeySecretAdapter()
+            ->withKeySecretAdapter()
             ->get(self::API_URI_GROUP)
         ;
     }
