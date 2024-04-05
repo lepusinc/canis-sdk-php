@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Canis\Api;
 
+use Canis\Api\Auth\Config;
+
 Class CP_API_Seminar_Entry extends ApiAbstract
 {
     const API_URI_SEMINAR_ENTRY = '/seminar/entry';
@@ -14,10 +16,10 @@ Class CP_API_Seminar_Entry extends ApiAbstract
     const API_URI_SEMINAR_ENTRY_MEMBER = '/seminar/entry/member/:wp_post_id';
 
     /**
-     * @param array<string,string> $config
+     * @param \Canis\Api\Auth\Config $config
      * @return $this
      */
-    public function __construct(array $config)
+    public function __construct(Config $config)
     {
         parent::__construct($config);
 

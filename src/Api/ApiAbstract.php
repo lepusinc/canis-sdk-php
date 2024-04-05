@@ -6,8 +6,10 @@ namespace Canis\Api;
 use Canis\Api\Auth\Adapter\AuthAdapterInterface;
 use Canis\Api\Auth\Adapter\KeySecretAdapter;
 use Canis\Api\Auth\Adapter\TokenAdapter;
+use Canis\Api\Auth\Config;
 use Canis\Exception\ApiHttpErrorException;
 use Canis\Exception\ApiUrlNotFoundException;
+use Canis\Exception\TokenInvalidException;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ServerException;
 use Psr\Http\Message\ResponseInterface;
@@ -16,16 +18,6 @@ use Psr\Log\LoggerInterface;
 abstract class ApiAbstract
 {
     const API_VERSION = 'v1';
-
-    /**
-     * @var array<string,string> $config
-     */
-    public array $config;
-
-    /**
-     * @var string|null $endpointUrl
-     */
-    public ?string $endpointUrl;
 
     /**
      * @var \GuzzleHttp\Client $httpClient
@@ -55,53 +47,33 @@ abstract class ApiAbstract
     public function setLogger(LoggerInterface $logger): self
     {
         $this->logger = $logger;
+
         return $this;
     }
     
     /**
-     * @param array<string,string> $config
+     * @param Config $config
      * @return $this
      */
-    public function __construct(array $config)
+    public function __construct(
+        public Config $config
+    )
     {
-        $this->init($config);
+        $this->init();
     }
 
     /**
-     * Initialize the API client.
+     * Initialize the API client with the configuration.
      * 
-     * @param array<string,string> $config
-     * @return void
+     * @return self
      */
-    public function init(array $config): void
+    public function init(): self
     {
-        $this->config = $this->resolveConfig($config);
-
-        $this->endpointUrl = $this->config['endpoint_url'];
         $this->httpClient = $this->getHttpClient();
+
+        return $this;
     }
 
-    /**
-     * Resolve configuration.
-     * 
-     * @param array<string,string> $config
-     * @return array<string,string>
-     */
-    public function resolveConfig(array $config): array
-    {
-        $config = array_merge(
-            [
-                'endpoint_url' => '',
-                'key' => '',
-                'secret' => '',
-                'token' => '',
-            ],
-            $config
-        );
-
-        return $config;
-    }
-    
     /**
      * Get a instance of the Guzzle HTTP client.
      *
@@ -123,6 +95,7 @@ abstract class ApiAbstract
     public function setPlaceholders(array $placeholders): self
     {
         $this->placeholders = $placeholders;
+
         return $this;
     }
 
@@ -231,7 +204,7 @@ abstract class ApiAbstract
     {
         $this->validate();
 
-        $endpointUrl = rtrim($this->endpointUrl, '/');
+        $endpoint = rtrim($this->config->getEndpoint(), '/');
 
         /**
          * Handle request options and set credentials if 
@@ -250,7 +223,7 @@ abstract class ApiAbstract
         /**
          * Create and send an HTTP request
          */
-        $endpoint = $endpointUrl . '/' . self::API_VERSION . $uri;
+        $endpoint = $endpoint . '/' . self::API_VERSION . $uri;
         try {
 
             $this->log('debug', "{$method} {$endpoint}");
@@ -339,8 +312,8 @@ abstract class ApiAbstract
     public function withKeySecretAdapter(): self
     {
         $this->authAdapter = new KeySecretAdapter(
-            $this->config['key'],
-            $this->config['secret']
+            $this->config->getKey(),
+            $this->config->getSecret(),
         );
         return $this;
     }
@@ -352,8 +325,20 @@ abstract class ApiAbstract
      */
     public function withTokenAdapter(): self
     {
+        if ($this->config->getToken()->isEmpty()) {
+            throw TokenInvalidException::empty(
+                'This adapter requires token but not found.'
+            );
+        }
+
+        if ($this->config->getToken()->isInvalid()) {
+            throw TokenInvalidException::invalid(
+                'This adapter requires valid token but it is invalid.'
+            );
+        }
+
         $this->authAdapter = new TokenAdapter(
-            $this->config['token']
+            $this->config->getToken(),
         );
         return $this;
     }
@@ -397,7 +382,7 @@ abstract class ApiAbstract
      */
     protected function validate(): void
     {
-        if (empty($this->endpointUrl)) {
+        if (empty($this->config->getEndpoint())) {
             throw ApiUrlNotFoundException::factory('Base URL is not configured.');
         }
     }

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Canis\Api;
 
+use Canis\Api\Auth\Config;
+
 Class Auth extends ApiAbstract
 {
     const API_URI_AUTH_LOGIN = '/auth/login';
@@ -26,10 +28,10 @@ Class Auth extends ApiAbstract
     const WHITELIST_SCOPE_EMAIL_REGISTERED = 'email-registered';
 
     /**
-     * @param array<string,string> $config
+     * @param \Canis\Api\Auth\Config $config
      * @return $this
      */
-    public function __construct(array $config)
+    public function __construct(Config $config)
     {
         parent::__construct($config);
 

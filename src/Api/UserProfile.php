@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Canis\Api;
 
+use Canis\Api\Auth\Config;
+
 Class CP_API_User_Profile extends ApiAbstract
 {
     const API_URI_USER_PROFILE = '/user/profile/:uuid';
@@ -10,10 +12,10 @@ Class CP_API_User_Profile extends ApiAbstract
     const API_URI_USER_DELIVERY_EMAIL = '/user/delivery-email/:uuid';
 
     /**
-     * @param array<string,string> $config
+     * @param \Canis\Api\Auth\Config $config
      * @return $this
      */
-    public function __construct(array $config)
+    public function __construct(Config $config)
     {
         parent::__construct($config);
 

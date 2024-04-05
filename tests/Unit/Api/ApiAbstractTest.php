@@ -3,12 +3,13 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Api;
 
-use GuzzleHttp\Client;
+use Canis\Api\ApiAbstract;
+use Canis\Api\Auth\Config;
+use Canis\Api\Auth\Token;
 use GuzzleHttp\ClientInterface;
 use PHPUnit\Framework\TestCase;
 use Mockery;
 use Mockery\MockInterface;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class ApiAbstractTest extends TestCase
@@ -32,15 +33,36 @@ class ApiAbstractTest extends TestCase
     }
 
     /**
-     * @param array<string,string> $config
+     * Return an instance of the class.
+     * 
+     * @param string $endpoint
+     * @param Token|null $token
+     * @param string $key
+     * @param string $secret
+     * @param array $options
+     * @return \Canis\Api\ApiAbstract
      */
-    private function getClass(array $config)
+    private function getClass(
+        string $endpoint = '',
+        ?Token $token = null,
+        string $key = '',
+        string $secret = '',
+        array $options = []
+    ): ApiAbstract
     {
+        $config = $this->getConfig(
+            endpoint: $endpoint,
+            token: $token ?? Token::factory(),
+            key: $key,
+            secret: $secret,
+            options: $options,
+        );
+
         return new class($config) extends \Canis\Api\ApiAbstract {
             /**
-             * @param array<string,string> $config
+             * @param Config $config
              */
-            public function __construct(array $config)
+            public function __construct(Config $config)
             {
                 parent::__construct($config);
             }
@@ -48,54 +70,59 @@ class ApiAbstractTest extends TestCase
     }
 
     /**
-     * @covers \Canis\Api\ApiAbstract::init
+     * Return an instance of the Config class.
+     * 
+     * @param string $endpoint
+     * @param Token|null $token
+     * @param string $key
+     * @param string $secret
+     * @param array $options
+     * @return \Canis\Api\Auth\Config
      */
-    public function test_init(): void
+    private function getConfig(
+        string $endpoint = '',
+        ?Token $token = null,
+        string $key = '',
+        string $secret = '',
+        array $options = []
+    ): Config
     {
-        $api = $this->getClass([]);
-        $config = [
-            'endpoint_url' => 'https://api.canis.io',
-            'timeout' => 10,
-            'token' => 'abcdefghijklmnopqrstuvwxyz',
-        ];
-        $result = $api->init($config);
+        return new \Canis\Api\Auth\Config(
+            endpoint: $endpoint,
+            token: $token ?? Token::factory(),
+            key: $key,
+            secret: $secret,
+            options: $options,
+        );
+    }
 
-        $this->assertArrayHasKey('endpoint_url', $api->config);
-        $this->assertArrayHasKey('timeout', $api->config);
-        $this->assertArrayHasKey('token', $api->config);
-        $this->assertArrayHasKey('key', $api->config);
-        $this->assertArrayHasKey('secret', $api->config);
+    /**
+     * @covers \Canis\Api\ApiAbstract::__construct
+     */
+    public function test_construct(): void
+    {
+        $endpoint = 'https://api.canis.io';
+        $token = 'abcdefghijklmnopqrstuvwxyz';
 
-        $this->assertEquals($config['endpoint_url'], $api->config['endpoint_url']);
-        $this->assertEquals($config['timeout'], $api->config['timeout']);
-        $this->assertEquals($config['token'], $api->config['token']);
+        $api = $this->getClass(
+            endpoint: $endpoint,
+            token: Token::factory()->setToken($token),
+        );
 
-        $this->assertEquals($config['endpoint_url'], $api->endpointUrl);
+        $this->assertEquals($endpoint, $api->config->getEndpoint());
+        $this->assertEquals($token, $api->config->getToken()->getToken());
+        
         $this->assertInstanceOf(\GuzzleHttp\Client::class, $api->getHttpClient());
     }
 
     /**
-     * @covers \Canis\Api\ApiAbstract::resolveConfig
+     * @covers \Canis\Api\ApiAbstract::init
      */
-    public function test_resolveConfig(): void
+    public function test_init(): void
     {
-        $api = $this->getClass([]);
-        $config = [
-            'endpoint_url' => 'https://api.canis.io',
-            'timeout' => 10,
-            'token' => 'abcdefghijklmnopqrstuvwxyz',
-        ];
-        $result = $api->resolveConfig($config);
+        $api = $this->getClass()->init();
 
-        $this->assertArrayHasKey('endpoint_url', $result);
-        $this->assertArrayHasKey('timeout', $result);
-        $this->assertArrayHasKey('token', $result);
-        $this->assertArrayHasKey('key', $result);
-        $this->assertArrayHasKey('secret', $result);
-
-        $this->assertEquals($config['endpoint_url'], $result['endpoint_url']);
-        $this->assertEquals($config['timeout'], $result['timeout']);
-        $this->assertEquals($config['token'], $result['token']);
+        $this->assertInstanceOf(\GuzzleHttp\Client::class, $api->getHttpClient());
     }
 
     /**
@@ -103,7 +130,7 @@ class ApiAbstractTest extends TestCase
      */
     public function test_getHttpClient(): void
     {
-        $api = $this->getClass([]);
+        $api = $this->getClass();
 
         $this->assertInstanceOf(\GuzzleHttp\Client::class, $api->getHttpClient());
     }
@@ -113,7 +140,7 @@ class ApiAbstractTest extends TestCase
      */
     public function test_setPlaceholders(): void
     {
-        $api = $this->getClass([]);
+        $api = $this->getClass();
 
         $this->assertEquals(
             [':key' => 'value'],
@@ -126,7 +153,7 @@ class ApiAbstractTest extends TestCase
      */
     public function test_sendRequest_ApiUrlNotFoundException(): void
     {
-        $api = $this->getClass([]);
+        $api = $this->getClass();
 
         $this->expectException(\Canis\Exception\ApiUrlNotFoundException::class);
 
