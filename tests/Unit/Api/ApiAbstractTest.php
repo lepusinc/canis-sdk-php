@@ -6,7 +6,11 @@ namespace Tests\Unit\Api;
 use Canis\Api\ApiAbstract;
 use Canis\Api\Auth\Config;
 use Canis\Api\Auth\Token;
+use Canis\Exception\ApiHttpErrorException;
+use Canis\Exception\ApiUrlNotFoundException;
+use GuzzleHttp\Middleware;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 class ApiAbstractTest extends TestCase
 {
@@ -15,7 +19,7 @@ class ApiAbstractTest extends TestCase
      */
     public function test_construct(): void
     {
-        $endpoint = 'https://api.canis.io';
+        $endpoint = 'https://example.com/api/v1';
         $token = 'abcdefghijklmnopqrstuvwxyz';
 
         $api = $this->getClass(
@@ -63,6 +67,162 @@ class ApiAbstractTest extends TestCase
     }
 
     /**
+     * @covers \Canis\Api\ApiAbstract::get
+     * @see https://docs.guzzlephp.org/en/stable/testing.html
+     */
+    public function test_get(): void
+    {
+        $container = [];
+        $history = Middleware::history($container);
+        $mockHandler = $this->getMockHandler(status: 200);
+        $mockHandler->push($history);
+
+        $api = $this->getClass(
+            endpoint: 'https://example.com/api',
+        );
+
+        $results = $api->get(
+            '/user/profile/:uuid',
+            ['foo' => 'bar'],
+            ['handler' => $mockHandler],
+        );
+
+        $transaction = $container[0];
+        $this->assertIsArray($transaction);
+
+        /** @var array<int,\GuzzleHttp\Psr7\Request>|
+         * array<int,\GuzzleHttp\Psr7\Response> $transaction */
+        $this->assertEquals('GET', $transaction['request']->getMethod());
+        $this->assertEquals(
+            'https://example.com/api/' .
+                ApiAbstract::API_VERSION .
+                '/user/profile/:uuid?foo=bar',
+            (string) $transaction['request']->getUri()
+        );
+        $this->assertEquals(200, $transaction['response']->getStatusCode());
+    }
+
+    /**
+     * @covers \Canis\Api\ApiAbstract::post
+     * @see https://docs.guzzlephp.org/en/stable/testing.html
+     */
+    public function test_post(): void
+    {
+        $container = [];
+        $history = Middleware::history($container);
+        $mockHandler = $this->getMockHandler(status: 200);
+        $mockHandler->push($history);
+
+        $api = $this->getClass(
+            endpoint: 'https://example.com/api',
+        );
+
+        $api->post(
+            '/user/profile/:uuid',
+            ['foo' => 'bar'],
+            ['handler' => $mockHandler],
+        );
+
+        $transaction = $container[0];
+        $this->assertIsArray($transaction);
+
+        /** @var array<int,\GuzzleHttp\Psr7\Request>|
+         * array<int,\GuzzleHttp\Psr7\Response> $transaction */
+        $this->assertEquals('POST', $transaction['request']->getMethod());
+        $this->assertEquals(
+            'https://example.com/api/' .
+                ApiAbstract::API_VERSION .
+                '/user/profile/:uuid',
+            (string) $transaction['request']->getUri()
+        );
+        $this->assertEquals(
+            'application/json',
+            $transaction['request']->getHeader('Content-Type')[0]
+        );
+        $this->assertEquals(200, $transaction['response']->getStatusCode());
+    }
+
+    /**
+     * @covers \Canis\Api\ApiAbstract::put
+     * @see https://docs.guzzlephp.org/en/stable/testing.html
+     */
+    public function test_put(): void
+    {
+        $container = [];
+        $history = Middleware::history($container);
+        $mockHandler = $this->getMockHandler(status: 200);
+        $mockHandler->push($history);
+
+        $api = $this->getClass(
+            endpoint: 'https://example.com/api',
+        );
+
+        $api->put(
+            '/user/profile/:uuid',
+            ['foo' => 'bar'],
+            ['handler' => $mockHandler],
+        );
+
+        $transaction = $container[0];
+        $this->assertIsArray($transaction);
+
+        /** @var array<int,\GuzzleHttp\Psr7\Request>|
+         * array<int,\GuzzleHttp\Psr7\Response> $transaction */
+        $this->assertEquals('PUT', $transaction['request']->getMethod());
+        $this->assertEquals(
+            'https://example.com/api/' .
+                ApiAbstract::API_VERSION .
+                '/user/profile/:uuid',
+            (string) $transaction['request']->getUri()
+        );
+        $this->assertEquals(
+            'application/json',
+            $transaction['request']->getHeader('Content-Type')[0]
+        );
+        $this->assertEquals(200, $transaction['response']->getStatusCode());
+    }
+
+    /**
+     * @covers \Canis\Api\ApiAbstract::put
+     * @see https://docs.guzzlephp.org/en/stable/testing.html
+     */
+    public function test_delete(): void
+    {
+        $container = [];
+        $history = Middleware::history($container);
+        $mockHandler = $this->getMockHandler(status: 200);
+        $mockHandler->push($history);
+
+        $api = $this->getClass(
+            endpoint: 'https://example.com/api',
+        );
+
+        $api->delete(
+            '/user/profile/:uuid',
+            ['foo' => 'bar'],
+            ['handler' => $mockHandler],
+        );
+
+        $transaction = $container[0];
+        $this->assertIsArray($transaction);
+
+        /** @var array<int,\GuzzleHttp\Psr7\Request>|
+         * array<int,\GuzzleHttp\Psr7\Response> $transaction */
+        $this->assertEquals('DELETE', $transaction['request']->getMethod());
+        $this->assertEquals(
+            'https://example.com/api/' .
+                ApiAbstract::API_VERSION .
+                '/user/profile/:uuid',
+            (string) $transaction['request']->getUri()
+        );
+        $this->assertEquals(
+            'application/json',
+            $transaction['request']->getHeader('Content-Type')[0]
+        );
+        $this->assertEquals(200, $transaction['response']->getStatusCode());
+    }
+
+    /**
      * @covers \Canis\Api\ApiAbstract::sendRequest
      */
     public function test_sendRequest_ApiUrlNotFoundException(): void
@@ -77,10 +237,46 @@ class ApiAbstractTest extends TestCase
     /**
      * @covers \Canis\Api\ApiAbstract::sendRequest
      */
+    public function test_sendRequest_ApiHttpErrorException(): void
+    {
+        $api = $this->getClass(
+            endpoint: 'https://example.com/api/v1',
+        );
+
+        // Assert 4xx error.
+        $this->expectException(ApiHttpErrorException::class);
+        $this->expectExceptionMessage('Not Found');
+
+        $api->sendRequest(
+            'GET',
+            'user/profile/:uuid',
+            ['handler' => $this->getMockHandler(
+                status: 404,
+                body: 'Not Found',
+            )],
+        );
+
+        // Assert 5xx error.
+        $this->expectException(ApiHttpErrorException::class);
+        $this->expectExceptionMessage('Service Unavailable');
+
+        $api->sendRequest(
+            'GET',
+            'user/profile/:uuid',
+            ['handler' => $this->getMockHandler(
+                status: 503,
+                body: 'Service Unavailable',
+            )],
+        );
+    }
+
+    /**
+     * @covers \Canis\Api\ApiAbstract::sendRequest
+     */
     public function test_sendRequest(): void
     {
         $api = $this->getClass(
-            endpoint: 'https://api.canis.io',
+            endpoint: 'https://example.com/api/v1',
         );
 
         $results = $api->sendRequest(
@@ -91,6 +287,7 @@ class ApiAbstractTest extends TestCase
             )],
         );
 
+        // Assert that the response is returned as an array.
         $this->assertEquals(['text' => 'foo'], $results);
     }
 
@@ -126,6 +323,124 @@ class ApiAbstractTest extends TestCase
         $adapter = $api->getAdapter();
         $this->assertInstanceOf(\Canis\Api\Auth\Adapter\TokenAdapter::class, $adapter);
         $this->assertEquals('abcdefghijklmnopqrstuvwxyz', $adapter->token->getToken());
+    }
+
+    public function test_setCredential_KeySecret_Get(): void
+    {
+        $api = $this->getClass(
+            key: 'key',
+            secret: 'secret',
+        )->withKeySecretAdapter();
+
+        $reflection = new ReflectionClass($api);
+        $method = $reflection->getMethod('setCredential');
+        $result = $method->invoke($api, ['foo' => 'bar'], 'GET');
+
+        /**
+         * Assert that in case that method is GET,
+         * key and secret are set in 'query' field.
+         */
+        $this->assertEquals(
+            [
+                'foo' => 'bar',
+                'query' => ['client_id' => 'key', 'client_secret' => 'secret'],
+            ], 
+            $result
+        );
+    }
+
+    public function test_setCredential_KeySecret_Post(): void
+    {
+        $api = $this->getClass(
+            key: 'key',
+            secret: 'secret',
+        )->withKeySecretAdapter();
+
+        $reflection = new ReflectionClass($api);
+        $method = $reflection->getMethod('setCredential');
+        $result = $method->invoke($api, ['foo' => 'bar'], 'POST');
+
+        /**
+         * Assert that in case that method is not GET,
+         * key and secret are set in 'json' field.
+         */
+        $this->assertEquals(
+            [
+                'foo' => 'bar',
+                'json' => ['client_id' => 'key', 'client_secret' => 'secret'],
+            ], 
+            $result
+        );
+    }
+
+    public function test_setCredential_Token(): void
+    {
+        $api = $this->getClass(
+            token: Token::factory(token: 'abcdefghijklmnopqrstuvwxyz'),
+        )->withTokenAdapter();
+
+        $reflection = new ReflectionClass($api);
+        $method = $reflection->getMethod('setCredential');
+        // 2nd argument is no matter in this case.
+        $result = $method->invoke($api, ['foo' => 'bar'], 'GET');
+
+        /**
+         * Assert that in case that method is GET,
+         * key and secret are set in 'query' field.
+         */
+        $this->assertEquals(
+            [
+                'foo' => 'bar',
+                'headers' => [
+                    'Authorization' => 'Bearer abcdefghijklmnopqrstuvwxyz',
+                ],
+            ], 
+            $result
+        );
+    }
+
+    public function test_validate_exception(): void
+    {
+        $api = $this->getClass(
+            key: 'key',
+            secret: 'secret',
+        )->withKeySecretAdapter();
+        
+        // Assert that exception is thrown.
+        $this->expectException(ApiUrlNotFoundException::class);
+
+        $reflection = new ReflectionClass($api);
+        $method = $reflection->getMethod('validate');
+        $method->invoke($api);
+    }
+
+    public function test_validate_noException(): void
+    {
+        $api = $this->getClass(
+            endpoint: 'https://example.com/api',
+            key: 'key',
+            secret: 'secret',
+        )->withKeySecretAdapter();
+        
+        $reflection = new ReflectionClass($api);
+        $method = $reflection->getMethod('validate');
+        $method->invoke($api);
+
+        // Assert that exception is NOT thrown.
+        $this->assertTrue(true);
+    }
+
+    public function test_replacePlaceholders(): void
+    {
+        $api = $this->getClass();
+
+        $api->setPlaceholders([':action' => 'show', ':id' => '1']);;
+        $this->assertEquals(
+            "/any/path/show/1",
+            $api->replacePlaceholders(
+                "/any/path/:action/:id"
+            )
+        );
     }
 
     /**
