@@ -7,6 +7,7 @@ use Canis\Api\ApiAbstract;
 use Canis\Api\Auth\Config;
 use Canis\Api\Auth\Token;
 use Canis\Exception\ApiHttpErrorException;
+use GuzzleHttp\Middleware;
 use PHPUnit\Framework\TestCase;
 
 class ApiAbstractTest extends TestCase
@@ -61,6 +62,162 @@ class ApiAbstractTest extends TestCase
             [':key' => 'value'],
             $api->setPlaceholders([':key' => 'value'])->placeholders
         );
+    }
+
+    /**
+     * @covers \Canis\Api\ApiAbstract::get
+     * @see https://docs.guzzlephp.org/en/stable/testing.html
+     */
+    public function test_get(): void
+    {
+        $container = [];
+        $history = Middleware::history($container);
+        $mockHandler = $this->getMockHandler(status: 200);
+        $mockHandler->push($history);
+
+        $api = $this->getClass(
+            endpoint: 'https://example.com/api',
+        );
+
+        $results = $api->get(
+            '/user/profile/:uuid',
+            ['foo' => 'bar'],
+            ['handler' => $mockHandler],
+        );
+
+        $transaction = $container[0];
+        $this->assertIsArray($transaction);
+
+        /** @var array<int,\GuzzleHttp\Psr7\Request>|
+         * array<int,\GuzzleHttp\Psr7\Response> $transaction */
+        $this->assertEquals('GET', $transaction['request']->getMethod());
+        $this->assertEquals(
+            'https://example.com/api/' .
+                ApiAbstract::API_VERSION .
+                '/user/profile/:uuid?foo=bar',
+            (string) $transaction['request']->getUri()
+        );
+        $this->assertEquals(200, $transaction['response']->getStatusCode());
+    }
+
+    /**
+     * @covers \Canis\Api\ApiAbstract::post
+     * @see https://docs.guzzlephp.org/en/stable/testing.html
+     */
+    public function test_post(): void
+    {
+        $container = [];
+        $history = Middleware::history($container);
+        $mockHandler = $this->getMockHandler(status: 200);
+        $mockHandler->push($history);
+
+        $api = $this->getClass(
+            endpoint: 'https://example.com/api',
+        );
+
+        $api->post(
+            '/user/profile/:uuid',
+            ['foo' => 'bar'],
+            ['handler' => $mockHandler],
+        );
+
+        $transaction = $container[0];
+        $this->assertIsArray($transaction);
+
+        /** @var array<int,\GuzzleHttp\Psr7\Request>|
+         * array<int,\GuzzleHttp\Psr7\Response> $transaction */
+        $this->assertEquals('POST', $transaction['request']->getMethod());
+        $this->assertEquals(
+            'https://example.com/api/' .
+                ApiAbstract::API_VERSION .
+                '/user/profile/:uuid',
+            (string) $transaction['request']->getUri()
+        );
+        $this->assertEquals(
+            'application/json',
+            $transaction['request']->getHeader('Content-Type')[0]
+        );
+        $this->assertEquals(200, $transaction['response']->getStatusCode());
+    }
+
+    /**
+     * @covers \Canis\Api\ApiAbstract::put
+     * @see https://docs.guzzlephp.org/en/stable/testing.html
+     */
+    public function test_put(): void
+    {
+        $container = [];
+        $history = Middleware::history($container);
+        $mockHandler = $this->getMockHandler(status: 200);
+        $mockHandler->push($history);
+
+        $api = $this->getClass(
+            endpoint: 'https://example.com/api',
+        );
+
+        $api->put(
+            '/user/profile/:uuid',
+            ['foo' => 'bar'],
+            ['handler' => $mockHandler],
+        );
+
+        $transaction = $container[0];
+        $this->assertIsArray($transaction);
+
+        /** @var array<int,\GuzzleHttp\Psr7\Request>|
+         * array<int,\GuzzleHttp\Psr7\Response> $transaction */
+        $this->assertEquals('PUT', $transaction['request']->getMethod());
+        $this->assertEquals(
+            'https://example.com/api/' .
+                ApiAbstract::API_VERSION .
+                '/user/profile/:uuid',
+            (string) $transaction['request']->getUri()
+        );
+        $this->assertEquals(
+            'application/json',
+            $transaction['request']->getHeader('Content-Type')[0]
+        );
+        $this->assertEquals(200, $transaction['response']->getStatusCode());
+    }
+
+    /**
+     * @covers \Canis\Api\ApiAbstract::put
+     * @see https://docs.guzzlephp.org/en/stable/testing.html
+     */
+    public function test_delete(): void
+    {
+        $container = [];
+        $history = Middleware::history($container);
+        $mockHandler = $this->getMockHandler(status: 200);
+        $mockHandler->push($history);
+
+        $api = $this->getClass(
+            endpoint: 'https://example.com/api',
+        );
+
+        $api->delete(
+            '/user/profile/:uuid',
+            ['foo' => 'bar'],
+            ['handler' => $mockHandler],
+        );
+
+        $transaction = $container[0];
+        $this->assertIsArray($transaction);
+
+        /** @var array<int,\GuzzleHttp\Psr7\Request>|
+         * array<int,\GuzzleHttp\Psr7\Response> $transaction */
+        $this->assertEquals('DELETE', $transaction['request']->getMethod());
+        $this->assertEquals(
+            'https://example.com/api/' .
+                ApiAbstract::API_VERSION .
+                '/user/profile/:uuid',
+            (string) $transaction['request']->getUri()
+        );
+        $this->assertEquals(
+            'application/json',
+            $transaction['request']->getHeader('Content-Type')[0]
+        );
+        $this->assertEquals(200, $transaction['response']->getStatusCode());
     }
 
     /**
