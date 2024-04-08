@@ -7,8 +7,10 @@ use Canis\Api\ApiAbstract;
 use Canis\Api\Auth\Config;
 use Canis\Api\Auth\Token;
 use Canis\Exception\ApiHttpErrorException;
+use Canis\Exception\ApiUrlNotFoundException;
 use GuzzleHttp\Middleware;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 class ApiAbstractTest extends TestCase
 {
@@ -321,6 +323,124 @@ class ApiAbstractTest extends TestCase
         $adapter = $api->getAdapter();
         $this->assertInstanceOf(\Canis\Api\Auth\Adapter\TokenAdapter::class, $adapter);
         $this->assertEquals('abcdefghijklmnopqrstuvwxyz', $adapter->token->getToken());
+    }
+
+    public function test_setCredential_KeySecret_Get(): void
+    {
+        $api = $this->getClass(
+            key: 'key',
+            secret: 'secret',
+        )->withKeySecretAdapter();
+
+        $reflection = new ReflectionClass($api);
+        $method = $reflection->getMethod('setCredential');
+        $result = $method->invoke($api, ['foo' => 'bar'], 'GET');
+
+        /**
+         * Assert that in case that method is GET,
+         * key and secret are set in 'query' field.
+         */
+        $this->assertEquals(
+            [
+                'foo' => 'bar',
+                'query' => ['client_id' => 'key', 'client_secret' => 'secret'],
+            ], 
+            $result
+        );
+    }
+
+    public function test_setCredential_KeySecret_Post(): void
+    {
+        $api = $this->getClass(
+            key: 'key',
+            secret: 'secret',
+        )->withKeySecretAdapter();
+
+        $reflection = new ReflectionClass($api);
+        $method = $reflection->getMethod('setCredential');
+        $result = $method->invoke($api, ['foo' => 'bar'], 'POST');
+
+        /**
+         * Assert that in case that method is not GET,
+         * key and secret are set in 'json' field.
+         */
+        $this->assertEquals(
+            [
+                'foo' => 'bar',
+                'json' => ['client_id' => 'key', 'client_secret' => 'secret'],
+            ], 
+            $result
+        );
+    }
+
+    public function test_setCredential_Token(): void
+    {
+        $api = $this->getClass(
+            token: Token::factory(token: 'abcdefghijklmnopqrstuvwxyz'),
+        )->withTokenAdapter();
+
+        $reflection = new ReflectionClass($api);
+        $method = $reflection->getMethod('setCredential');
+        // 2nd argument is no matter in this case.
+        $result = $method->invoke($api, ['foo' => 'bar'], 'GET');
+
+        /**
+         * Assert that in case that method is GET,
+         * key and secret are set in 'query' field.
+         */
+        $this->assertEquals(
+            [
+                'foo' => 'bar',
+                'headers' => [
+                    'Authorization' => 'Bearer abcdefghijklmnopqrstuvwxyz',
+                ],
+            ], 
+            $result
+        );
+    }
+
+    public function test_validate_exception(): void
+    {
+        $api = $this->getClass(
+            key: 'key',
+            secret: 'secret',
+        )->withKeySecretAdapter();
+        
+        // Assert that exception is thrown.
+        $this->expectException(ApiUrlNotFoundException::class);
+
+        $reflection = new ReflectionClass($api);
+        $method = $reflection->getMethod('validate');
+        $method->invoke($api);
+    }
+
+    public function test_validate_noException(): void
+    {
+        $api = $this->getClass(
+            endpoint: 'https://example.com/api',
+            key: 'key',
+            secret: 'secret',
+        )->withKeySecretAdapter();
+        
+        $reflection = new ReflectionClass($api);
+        $method = $reflection->getMethod('validate');
+        $method->invoke($api);
+
+        // Assert that exception is NOT thrown.
+        $this->assertTrue(true);
+    }
+
+    public function test_replacePlaceholders(): void
+    {
+        $api = $this->getClass();
+
+        $api->setPlaceholders([':action' => 'show', ':id' => '1']);;
+        $this->assertEquals(
+            "/any/path/show/1",
+            $api->replacePlaceholders(
+                "/any/path/:action/:id"
+            )
+        );
     }
 
     /**

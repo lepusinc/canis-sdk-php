@@ -375,8 +375,7 @@ abstract class ApiAbstract
     protected function setCredential(array $options, string $method): array
     {
         if ($this->authAdapter instanceof AuthAdapterInterface) {
-            $is_get = ($method === 'GET');
-            $options = $this->authAdapter->setCredential($options, $is_get);
+            $options = $this->authAdapter->setCredential($options, ($method === 'GET'));
         }
 
         return $options;
@@ -400,10 +399,11 @@ abstract class ApiAbstract
     /**
      * Replace using specified placeholders.
      * 
-     * For example:
-     * echo replace_placeholders(
+     * Usage:
+     * 
+     * $api->setPlaceholders([':action' => 'show', ':id' => '1']);
+     * echo $api->replacePlaceholders(
      *     "/any/path/:action/:id",
-     *     [':action' => 'show', ':uuid' => '1']
      * );
      * 
      * Result: /any/path/show/1
@@ -411,7 +411,7 @@ abstract class ApiAbstract
      * @param string $subject
      * @return string
      */
-    protected function replacePlaceholders(string $subject): string
+    public function replacePlaceholders(string $subject): string
     {
         if (empty($this->placeholders)) {
             return $subject;
