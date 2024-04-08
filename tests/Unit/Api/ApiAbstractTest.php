@@ -6,6 +6,7 @@ namespace Tests\Unit\Api;
 use Canis\Api\ApiAbstract;
 use Canis\Api\Auth\Config;
 use Canis\Api\Auth\Token;
+use Canis\Exception\ApiHttpErrorException;
 use PHPUnit\Framework\TestCase;
 
 class ApiAbstractTest extends TestCase
@@ -15,7 +16,7 @@ class ApiAbstractTest extends TestCase
      */
     public function test_construct(): void
     {
-        $endpoint = 'https://api.canis.io';
+        $endpoint = 'https://example.com/api/v1';
         $token = 'abcdefghijklmnopqrstuvwxyz';
 
         $api = $this->getClass(
@@ -77,10 +78,46 @@ class ApiAbstractTest extends TestCase
     /**
      * @covers \Canis\Api\ApiAbstract::sendRequest
      */
+    public function test_sendRequest_ApiHttpErrorException(): void
+    {
+        $api = $this->getClass(
+            endpoint: 'https://example.com/api/v1',
+        );
+
+        // Assert 4xx error.
+        $this->expectException(ApiHttpErrorException::class);
+        $this->expectExceptionMessage('Not Found');
+
+        $api->sendRequest(
+            'GET',
+            'user/profile/:uuid',
+            ['handler' => $this->getMockHandler(
+                status: 404,
+                body: 'Not Found',
+            )],
+        );
+
+        // Assert 5xx error.
+        $this->expectException(ApiHttpErrorException::class);
+        $this->expectExceptionMessage('Service Unavailable');
+
+        $api->sendRequest(
+            'GET',
+            'user/profile/:uuid',
+            ['handler' => $this->getMockHandler(
+                status: 503,
+                body: 'Service Unavailable',
+            )],
+        );
+    }
+
+    /**
+     * @covers \Canis\Api\ApiAbstract::sendRequest
+     */
     public function test_sendRequest(): void
     {
         $api = $this->getClass(
-            endpoint: 'https://api.canis.io',
+            endpoint: 'https://example.com/api/v1',
         );
 
         $results = $api->sendRequest(
@@ -91,6 +128,7 @@ class ApiAbstractTest extends TestCase
             )],
         );
 
+        // Assert that the response is returned as an array.
         $this->assertEquals(['text' => 'foo'], $results);
     }
 
